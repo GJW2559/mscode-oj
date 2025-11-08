@@ -1,0 +1,1130 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MSCODE - 在线判题系统</title>
+    <style>
+        /* 重置样式 */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: Arial, sans-serif; 
+            background: #f5f5f5; 
+            line-height: 1.6;
+        }
+        
+        /* 登录页面 */
+        #loginPage {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .login-container {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            width: 90%;
+            max-width: 400px;
+        }
+        
+        .login-title {
+            text-align: center;
+            margin-bottom: 1.5rem;
+            color: #333;
+        }
+        
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 12px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        
+        .btn:hover {
+            background: #45a049;
+        }
+        
+        /* 主应用 */
+        #appPage {
+            display: none;
+        }
+        
+        header {
+            background: #2c3e50;
+            color: white;
+            padding: 1rem 0;
+        }
+        
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        
+        nav ul {
+            list-style: none;
+            display: flex;
+            gap: 20px;
+        }
+        
+        nav a {
+            color: white;
+            text-decoration: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+        }
+        
+        nav a.active {
+            background: rgba(255,255,255,0.2);
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        main {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 20px;
+        }
+        
+        .card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 1.5rem;
+        }
+        
+        .problem-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        .problem-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            border: 1px solid #eee;
+        }
+        
+        .problem-actions {
+            margin-top: 1rem;
+            display: flex;
+            gap: 10px;
+        }
+        
+        /* 代码编辑器样式 */
+        .editor-container {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-bottom: 1rem;
+        }
+        
+        .editor-header {
+            background: #f5f5f5;
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .editor-title {
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .language-selector {
+            padding: 5px 10px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+        }
+        
+        .code-editor {
+            width: 100%;
+            min-height: 300px;
+            padding: 15px;
+            border: none;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            background: #f8f9fa;
+            resize: vertical;
+            white-space: pre;
+            overflow-x: auto;
+        }
+        
+        /* 模态框 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .close {
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+        
+        .btn-danger { background: #e74c3c; }
+        .btn-warning { background: #f39c12; }
+        .btn-success { background: #27ae60; }
+        
+        .btn-danger:hover { background: #c0392b; }
+        .btn-warning:hover { background: #e67e22; }
+        .btn-success:hover { background: #229954; }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+        
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        th {
+            background: #f8f9fa;
+            font-weight: bold;
+        }
+        
+        .result-output {
+            background: #2c3e50;
+            color: white;
+            padding: 1rem;
+            border-radius: 5px;
+            margin-top: 1rem;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .result-success {
+            border-left: 4px solid #27ae60;
+        }
+        
+        .result-error {
+            border-left: 4px solid #e74c3c;
+        }
+        
+        .role-badge {
+            padding: 4px 8px;
+            border-radius: 3px;
+            font-size: 0.8rem;
+            color: white;
+        }
+        
+        .role-root { background: #e74c3c; }
+        .role-admin { background: #f39c12; }
+        .role-user { background: #3498db; }
+    </style>
+</head>
+<body>
+    <!-- 登录页面 -->
+    <div id="loginPage">
+        <div class="login-container">
+            <h1 class="login-title">MSCODE 登录</h1>
+            <div class="form-group">
+                <label for="loginUsername">用户名</label>
+                <input type="text" id="loginUsername" placeholder="请输入用户名">
+            </div>
+            <div class="form-group">
+                <label for="loginPassword">密码</label>
+                <input type="password" id="loginPassword" placeholder="请输入密码">
+            </div>
+            <button id="loginBtn" class="btn">登录</button>
+            <div style="margin-top: 1rem; text-align: center; color: #666;">
+                <p>测试账号: root / root123456</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 主应用页面 -->
+    <div id="appPage">
+        <header>
+            <div class="header-content">
+                <div class="logo">HUSTOJ</div>
+                <nav>
+                    <ul>
+                        <li><a href="#" class="nav-link active" data-tab="problems">题目列表</a></li>
+                        <li><a href="#" class="nav-link admin-only hidden" data-tab="users">用户管理</a></li>
+                        <li><a href="#" class="nav-link admin-only hidden" data-tab="problemManagement">题目管理</a></li>
+                        <li><a href="#" class="nav-link" data-tab="submissions">提交记录</a></li>
+                    </ul>
+                </nav>
+                <div class="user-info">
+                    <span>欢迎, <span id="currentUserName"></span></span>
+                    <button id="changePasswordBtn" class="btn btn-warning">修改密码</button>
+                    <button id="logoutBtn" class="btn btn-danger">退出</button>
+                </div>
+            </div>
+        </header>
+
+        <main>
+            <!-- 题目列表 -->
+            <div id="problems" class="tab-content">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>题目列表</h2>
+                        <input type="text" id="problemSearch" placeholder="搜索题目...">
+                    </div>
+                    <div class="problem-list" id="problemListContainer">
+                        <!-- 题目列表将通过JS动态生成 -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- 用户管理 -->
+            <div id="users" class="tab-content hidden">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>用户管理</h2>
+                        <button id="addUserBtn" class="btn btn-success">添加用户</button>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>用户名</th>
+                                <th>昵称</th>
+                                <th>角色</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="userTableBody">
+                            <!-- 用户数据将通过JS动态生成 -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 题目管理 -->
+            <div id="problemManagement" class="tab-content hidden">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>题目管理</h2>
+                        <button id="addProblemBtn" class="btn btn-success">添加题目</button>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>标题</th>
+                                <th>难度</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="problemTableBody">
+                            <!-- 题目数据将通过JS动态生成 -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 提交记录 -->
+            <div id="submissions" class="tab-content hidden">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>提交记录</h2>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>提交ID</th>
+                                <th>题目</th>
+                                <th>状态</th>
+                                <th>提交时间</th>
+                            </tr>
+                        </thead>
+                        <tbody id="submissionTableBody">
+                            <!-- 提交记录将通过JS动态生成 -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- 模态框 -->
+    <div id="changePasswordModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>修改密码</h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="form-group">
+                <label>当前密码</label>
+                <input type="password" id="currentPassword">
+            </div>
+            <div class="form-group">
+                <label>新密码</label>
+                <input type="password" id="newPassword">
+            </div>
+            <div class="form-group">
+                <label>确认新密码</label>
+                <input type="password" id="confirmPassword">
+            </div>
+            <button id="savePasswordBtn" class="btn btn-success">保存</button>
+        </div>
+    </div>
+
+    <div id="userModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="userModalTitle">添加用户</h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="form-group">
+                <label>用户名</label>
+                <input type="text" id="userUsername">
+            </div>
+            <div class="form-group">
+                <label>昵称</label>
+                <input type="text" id="userNickname">
+            </div>
+            <div class="form-group">
+                <label>密码</label>
+                <input type="password" id="userPassword">
+            </div>
+            <div class="form-group">
+                <label>角色</label>
+                <select id="userRole">
+                    <option value="user">普通用户</option>
+                    <option value="admin">管理员</option>
+                </select>
+            </div>
+            <button id="saveUserBtn" class="btn btn-success">保存</button>
+        </div>
+    </div>
+
+    <div id="problemModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="problemModalTitle">添加题目</h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="form-group">
+                <label>题目标题</label>
+                <input type="text" id="problemTitle">
+            </div>
+            <div class="form-group">
+                <label>题目描述</label>
+                <textarea id="problemDescription"></textarea>
+            </div>
+            <div class="form-group">
+                <label>预设代码（正确答案）</label>
+                <textarea id="presetCode" placeholder="请输入正确的代码答案"></textarea>
+            </div>
+            <button id="saveProblemBtn" class="btn btn-success">保存</button>
+        </div>
+    </div>
+
+    <!-- 代码编辑器模态框 -->
+    <div id="codeEditorModal" class="modal">
+        <div class="modal-content" style="max-width: 1000px;">
+            <div class="modal-header">
+                <h3 id="codeEditorTitle">代码编辑器</h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="problem-info" id="problemInfo">
+                <!-- 题目信息将在这里显示 -->
+            </div>
+            <div class="form-group">
+                <label>选择编程语言</label>
+                <select id="codeLanguage" class="language-selector">
+                    <option value="cpp">C++</option>
+                    <option value="c">C</option>
+                    <option value="python">Python</option>
+                    <option value="java">Java</option>
+                </select>
+            </div>
+            <div class="editor-container">
+                <div class="editor-header">
+                    <div class="editor-title" id="currentFileName">main.cpp</div>
+                </div>
+                <textarea id="codeEditor" class="code-editor"></textarea>
+            </div>
+            <div class="submit-actions" style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 1rem;">
+                <button id="submitCodeBtn" class="btn btn-success">提交代码</button>
+            </div>
+            <div id="codeOutput" class="result-output" style="display: none;">
+                <!-- 代码对比结果将显示在这里 -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 简单的数据存储
+        let currentUser = null;
+        let users = [
+            { username: 'root', nickname: '超级管理员', password: 'root123456', role: 'root' },
+            { username: 'admin', nickname: '管理员', password: 'admin123', role: 'admin' },
+            { username: 'user1', nickname: '测试用户', password: 'user123', role: 'user' }
+        ];
+        
+        let problems = [
+            { 
+                id: 1, 
+                title: 'A+B问题', 
+                description: '计算两个整数的和', 
+                presetCode: '' 
+            }
+        ];
+        
+        let submissions = [];
+        let nextProblemId = 2;
+        let nextSubmissionId = 1;
+        let currentEditingProblem = null;
+
+        // 代码模板
+        const codeTemplates = {
+            cpp: `#include <iostream>
+using namespace std;
+
+int main() {
+    int a, b;
+    cin >> a >> b;
+    cout << a + b << endl;
+    return 0;
+}`,
+            c: `#include <stdio.h>
+
+int main() {
+    int a, b;
+    scanf("%d %d", &a, &b);
+    printf("%d\\n", a + b);
+    return 0;
+}`,
+            python: `a, b = map(int, input().split())
+print(a + b)`,
+            java: `import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        int a = scanner.nextInt();
+        int b = scanner.nextInt();
+        System.out.println(a + b);
+    }
+}`
+        };
+
+        // 初始化函数
+        function init() {
+            console.log('系统初始化...');
+            loadData();
+            setupEventListeners();
+            checkLoginStatus();
+        }
+
+        function loadData() {
+            try {
+                const savedUsers = localStorage.getItem('mscode_users');
+                const savedProblems = localStorage.getItem('mscode_problems');
+                const savedSubmissions = localStorage.getItem('mscode_submissions');
+                
+                if (savedUsers) users = JSON.parse(savedUsers);
+                if (savedProblems) problems = JSON.parse(savedProblems);
+                if (savedSubmissions) submissions = JSON.parse(savedSubmissions);
+                
+                // 更新ID计数器
+                if (problems.length > 0) {
+                    nextProblemId = Math.max(...problems.map(p => p.id)) + 1;
+                }
+                if (submissions.length > 0) {
+                    nextSubmissionId = Math.max(...submissions.map(s => s.id)) + 1;
+                }
+            } catch (e) {
+                console.log('使用默认数据');
+            }
+        }
+
+        function saveData() {
+            try {
+                localStorage.setItem('mscode_users', JSON.stringify(users));
+                localStorage.setItem('mscode_problems', JSON.stringify(problems));
+                localStorage.setItem('mscode_submissions', JSON.stringify(submissions));
+                if (currentUser) {
+                    localStorage.setItem('mscode_currentUser', JSON.stringify(currentUser));
+                }
+            } catch (e) {
+                console.log('保存数据失败');
+            }
+        }
+
+        function setupEventListeners() {
+            console.log('设置事件监听器...');
+            
+            // 登录相关
+            document.getElementById('loginBtn').addEventListener('click', login);
+            document.getElementById('logoutBtn').addEventListener('click', logout);
+            
+            // 标签页切换
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    switchTab(this.getAttribute('data-tab'));
+                });
+            });
+            
+            // 模态框关闭
+            document.querySelectorAll('.close').forEach(close => {
+                close.addEventListener('click', function() {
+                    this.closest('.modal').style.display = 'none';
+                });
+            });
+            
+            // 用户管理
+            document.getElementById('addUserBtn').addEventListener('click', () => openUserModal());
+            document.getElementById('saveUserBtn').addEventListener('click', saveUser);
+            
+            // 题目管理
+            document.getElementById('addProblemBtn').addEventListener('click', () => openProblemModal());
+            document.getElementById('saveProblemBtn').addEventListener('click', saveProblem);
+            
+            // 密码修改
+            document.getElementById('changePasswordBtn').addEventListener('click', () => {
+                document.getElementById('changePasswordModal').style.display = 'flex';
+            });
+            document.getElementById('savePasswordBtn').addEventListener('click', changePassword);
+            
+            // 代码编辑器
+            document.getElementById('codeLanguage').addEventListener('change', function() {
+                setDefaultCode(this.value);
+            });
+            document.getElementById('submitCodeBtn').addEventListener('click', submitCode);
+            
+            // 搜索
+            document.getElementById('problemSearch').addEventListener('input', function(e) {
+                filterProblems(e.target.value);
+            });
+
+            // 点击模态框外部关闭
+            window.addEventListener('click', function(e) {
+                if (e.target.classList.contains('modal')) {
+                    e.target.style.display = 'none';
+                }
+            });
+        }
+
+        function checkLoginStatus() {
+            const savedUser = localStorage.getItem('mscode_currentUser');
+            if (savedUser) {
+                currentUser = JSON.parse(savedUser);
+                showApp();
+            } else {
+                showLogin();
+            }
+        }
+
+        function showLogin() {
+            document.getElementById('loginPage').style.display = 'flex';
+            document.getElementById('appPage').style.display = 'none';
+        }
+
+        function showApp() {
+            document.getElementById('loginPage').style.display = 'none';
+            document.getElementById('appPage').style.display = 'block';
+            updateUI();
+        }
+
+        function login() {
+            const username = document.getElementById('loginUsername').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            const user = users.find(u => u.username === username && u.password === password);
+            if (user) {
+                currentUser = user;
+                saveData();
+                showApp();
+            } else {
+                alert('用户名或密码错误');
+            }
+        }
+
+        function logout() {
+            currentUser = null;
+            localStorage.removeItem('mscode_currentUser');
+            showLogin();
+        }
+
+        function switchTab(tabName) {
+            // 隐藏所有标签页
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.add('hidden');
+            });
+            
+            // 显示选中的标签页
+            document.getElementById(tabName).classList.remove('hidden');
+            
+            // 更新导航状态
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+            });
+            document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+            
+            // 刷新数据
+            if (tabName === 'problems') renderProblems();
+            else if (tabName === 'users') renderUsers();
+            else if (tabName === 'problemManagement') renderProblemManagement();
+            else if (tabName === 'submissions') renderSubmissions();
+        }
+
+        function updateUI() {
+            document.getElementById('currentUserName').textContent = currentUser.nickname;
+            
+            // 权限控制 - user角色看不到用户管理和题目管理
+            const isAdmin = currentUser.role === 'root' || currentUser.role === 'admin';
+            document.querySelectorAll('.admin-only').forEach(el => {
+                el.classList.toggle('hidden', !isAdmin);
+            });
+            
+            renderProblems();
+        }
+
+        function renderProblems() {
+            const container = document.getElementById('problemListContainer');
+            container.innerHTML = '';
+            
+            problems.forEach(problem => {
+                const card = document.createElement('div');
+                card.className = 'problem-card';
+                card.innerHTML = `
+                    <h3>${problem.id}. ${problem.title}</h3>
+                    <p>${problem.description}</p>
+                    <div class="problem-actions">
+                        <button class="btn" onclick="viewProblem(${problem.id})">查看</button>
+                        <button class="btn btn-success" onclick="openCodeEditor(${problem.id})">解题</button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function viewProblem(id) {
+            const problem = problems.find(p => p.id === id);
+            alert(`题目: ${problem.title}\n\n描述: ${problem.description}`);
+        }
+
+        function openCodeEditor(id) {
+            const problem = problems.find(p => p.id === id);
+            currentEditingProblem = problem;
+            document.getElementById('codeEditorTitle').textContent = `代码编辑器 - ${problem.title}`;
+            
+            // 显示题目信息
+            document.getElementById('problemInfo').innerHTML = `
+                <div class="card">
+                    <h4>${problem.title}</h4>
+                    <p><strong>描述:</strong> ${problem.description}</p>
+                </div>
+            `;
+            
+            // 设置默认代码
+            setDefaultCode('cpp');
+            document.getElementById('codeOutput').style.display = 'none';
+            document.getElementById('codeEditorModal').style.display = 'flex';
+        }
+
+        function setDefaultCode(language) {
+            const editor = document.getElementById('codeEditor');
+            editor.value = codeTemplates[language] || codeTemplates.cpp;
+            
+            // 更新文件名显示
+            const fileNames = {
+                cpp: 'main.cpp',
+                c: 'main.c',
+                python: 'main.py',
+                java: 'Main.java'
+            };
+            document.getElementById('currentFileName').textContent = fileNames[language] || 'main.cpp';
+        }
+
+        function submitCode() {
+            const userCode = document.getElementById('codeEditor').value.trim();
+            const presetCode = currentEditingProblem.presetCode.trim();
+            const resultElement = document.getElementById('codeOutput');
+            
+            if (!userCode) {
+                alert('请先输入代码');
+                return;
+            }
+            
+            if (!presetCode) {
+                resultElement.textContent = '该题目还没有设置正确答案';
+                resultElement.style.display = 'block';
+                resultElement.className = 'result-output result-error';
+                return;
+            }
+            
+            // 标准化代码对比（移除多余空格、统一换行符）
+            const normalizeCode = (code) => {
+                return code
+                    .replace(/\r\n/g, '\n')  // 统一换行符
+                    .replace(/\s+/g, ' ')    // 压缩多个空格
+                    .replace(/\n\s*\n/g, '\n') // 压缩多个空行
+                    .trim(); // 移除首尾空白
+            };
+            
+            const userNormalized = normalizeCode(userCode);
+            const presetNormalized = normalizeCode(presetCode);
+            
+            console.log('用户代码标准化:', userNormalized);
+            console.log('预设代码标准化:', presetNormalized);
+            
+            let resultText = '';
+            let isSuccess = false;
+            
+            if (userNormalized === presetNormalized) {
+                resultText = '✅ 恭喜！代码完全正确！';
+                isSuccess = true;
+            } else {
+                resultText = '❌ 代码不正确！\n\n你的代码：\n' + userCode + '\n\n正确答案：\n' + presetCode;
+                isSuccess = false;
+            }
+            
+            resultElement.textContent = resultText;
+            resultElement.style.display = 'block';
+            resultElement.className = isSuccess ? 'result-output result-success' : 'result-output result-error';
+            
+            // 保存提交记录
+            const submission = {
+                id: nextSubmissionId++,
+                problemId: currentEditingProblem.id,
+                problemTitle: currentEditingProblem.title,
+                username: currentUser.username,
+                code: userCode,
+                status: isSuccess ? '通过' : '失败',
+                submitTime: new Date().toLocaleString()
+            };
+            submissions.unshift(submission);
+            saveData();
+            
+            if (isSuccess) {
+                setTimeout(() => {
+                    document.getElementById('codeEditorModal').style.display = 'none';
+                }, 2000);
+            }
+        }
+
+        function renderUsers() {
+            const tbody = document.getElementById('userTableBody');
+            tbody.innerHTML = '';
+            
+            const displayUsers = currentUser.role === 'root' ? 
+                users : users.filter(u => u.role !== 'root');
+            
+            displayUsers.forEach(user => {
+                const tr = document.createElement('tr');
+                const canEdit = currentUser.role === 'root' || 
+                               (currentUser.role === 'admin' && user.role === 'user');
+                
+                tr.innerHTML = `
+                    <td>${user.username}</td>
+                    <td>${user.nickname}</td>
+                    <td><span class="role-badge role-${user.role}">${getRoleText(user.role)}</span></td>
+                    <td>
+                        ${canEdit ? `<button class="btn btn-warning" onclick="openUserModal('${user.username}')">编辑</button>` : ''}
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function openUserModal(username = null) {
+            const modal = document.getElementById('userModal');
+            const title = document.getElementById('userModalTitle');
+            
+            if (username) {
+                title.textContent = '编辑用户';
+                const user = users.find(u => u.username === username);
+                document.getElementById('userUsername').value = user.username;
+                document.getElementById('userUsername').readOnly = true;
+                document.getElementById('userNickname').value = user.nickname;
+                document.getElementById('userRole').value = user.role;
+                document.getElementById('userPassword').value = '';
+                document.getElementById('userPassword').placeholder = '留空不修改';
+            } else {
+                title.textContent = '添加用户';
+                document.getElementById('userUsername').value = '';
+                document.getElementById('userUsername').readOnly = false;
+                document.getElementById('userNickname').value = '';
+                document.getElementById('userRole').value = 'user';
+                document.getElementById('userPassword').value = '';
+                document.getElementById('userPassword').placeholder = '';
+            }
+            
+            modal.style.display = 'flex';
+        }
+
+        function saveUser() {
+            const username = document.getElementById('userUsername').value;
+            const nickname = document.getElementById('userNickname').value;
+            const password = document.getElementById('userPassword').value;
+            const role = document.getElementById('userRole').value;
+            const isEdit = document.getElementById('userUsername').readOnly;
+            
+            if (!username || !nickname) {
+                alert('请填写完整信息');
+                return;
+            }
+            
+            if (isEdit) {
+                const user = users.find(u => u.username === username);
+                user.nickname = nickname;
+                user.role = role;
+                if (password) user.password = password;
+            } else {
+                if (!password) {
+                    alert('请设置密码');
+                    return;
+                }
+                if (users.find(u => u.username === username)) {
+                    alert('用户名已存在');
+                    return;
+                }
+                users.push({ username, nickname, password, role });
+            }
+            
+            saveData();
+            renderUsers();
+            document.getElementById('userModal').style.display = 'none';
+            alert('保存成功');
+        }
+
+        function renderProblemManagement() {
+            const tbody = document.getElementById('problemTableBody');
+            tbody.innerHTML = '';
+            
+            problems.forEach(problem => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${problem.id}</td>
+                    <td>${problem.title}</td>
+                    <td>简单</td>
+                    <td>
+                        <button class="btn btn-warning" onclick="openProblemModal(${problem.id})">编辑</button>
+                        <button class="btn btn-danger" onclick="deleteProblem(${problem.id})">删除</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function openProblemModal(id = null) {
+            const modal = document.getElementById('problemModal');
+            const title = document.getElementById('problemModalTitle');
+            
+            if (id) {
+                title.textContent = '编辑题目';
+                const problem = problems.find(p => p.id === id);
+                document.getElementById('problemTitle').value = problem.title;
+                document.getElementById('problemDescription').value = problem.description;
+                document.getElementById('presetCode').value = problem.presetCode;
+                currentEditingProblem = problem;
+            } else {
+                title.textContent = '添加题目';
+                document.getElementById('problemTitle').value = '';
+                document.getElementById('problemDescription').value = '';
+                document.getElementById('presetCode').value = '';
+                currentEditingProblem = null;
+            }
+            
+            modal.style.display = 'flex';
+        }
+
+        function saveProblem() {
+            const title = document.getElementById('problemTitle').value;
+            const description = document.getElementById('problemDescription').value;
+            const presetCode = document.getElementById('presetCode').value;
+            const isEdit = document.getElementById('problemModalTitle').textContent === '编辑题目';
+            
+            if (!title || !description) {
+                alert('请填写完整信息');
+                return;
+            }
+            
+            if (isEdit) {
+                const problem = problems.find(p => p.id === currentEditingProblem.id);
+                problem.title = title;
+                problem.description = description;
+                problem.presetCode = presetCode;
+            } else {
+                problems.push({
+                    id: nextProblemId++,
+                    title,
+                    description,
+                    presetCode
+                });
+            }
+            
+            saveData();
+            renderProblems();
+            renderProblemManagement();
+            document.getElementById('problemModal').style.display = 'none';
+            alert('保存成功');
+        }
+
+        function deleteProblem(id) {
+            if (confirm('确定删除这个题目吗？')) {
+                problems = problems.filter(p => p.id !== id);
+                saveData();
+                renderProblems();
+                renderProblemManagement();
+                alert('删除成功');
+            }
+        }
+
+        function renderSubmissions() {
+            const tbody = document.getElementById('submissionTableBody');
+            tbody.innerHTML = '';
+            
+            const userSubmissions = currentUser.role === 'root' ? 
+                submissions : submissions.filter(s => s.username === currentUser.username);
+            
+            userSubmissions.forEach(sub => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${sub.id}</td>
+                    <td>${sub.problemTitle}</td>
+                    <td>${sub.status}</td>
+                    <td>${sub.submitTime}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function changePassword() {
+            const current = document.getElementById('currentPassword').value;
+            const newPass = document.getElementById('newPassword').value;
+            const confirm = document.getElementById('confirmPassword').value;
+            
+            if (current !== currentUser.password) {
+                alert('当前密码错误');
+                return;
+            }
+            
+            if (!newPass) {
+                alert('请输入新密码');
+                return;
+            }
+            
+            if (newPass !== confirm) {
+                alert('两次输入密码不一致');
+                return;
+            }
+            
+            currentUser.password = newPass;
+            const user = users.find(u => u.username === currentUser.username);
+            user.password = newPass;
+            
+            saveData();
+            document.getElementById('changePasswordModal').style.display = 'none';
+            alert('密码修改成功');
+        }
+
+        function filterProblems(keyword) {
+            const container = document.getElementById('problemListContainer');
+            const filteredProblems = problems.filter(p => 
+                p.title.includes(keyword) || p.description.includes(keyword));
+            
+            container.innerHTML = '';
+            filteredProblems.forEach(problem => {
+                const card = document.createElement('div');
+                card.className = 'problem-card';
+                card.innerHTML = `
+                    <h3>${problem.id}. ${problem.title}</h3>
+                    <p>${problem.description}</p>
+                    <div class="problem-actions">
+                        <button class="btn" onclick="viewProblem(${problem.id})">查看</button>
+                        <button class="btn btn-success" onclick="openCodeEditor(${problem.id})">解题</button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function getRoleText(role) {
+            return { root: '超级管理员', admin: '管理员', user: '普通用户' }[role] || '未知';
+        }
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
