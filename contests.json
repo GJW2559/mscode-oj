@@ -1,1 +1,1 @@
-{"contests":[{"title":"1+1","desc":"1+1=","answer":"2"},{"title":"Hello,World","desc":"Hello,World","answer":"Hello,World"},{"title":"5*2","desc":"5*2=","answer":"10"}]}
+{"contests":[{"title":"1+1","desc":"1+1=","answer":"2"},{"title":"Hello,World","desc":"Hello,World","answer":"Hello,World"},{"title":"5*2","desc":"5*2=","answer":"10"},{"title":"二维数组的输入与输出","desc":"以二维数组存储数据并输出\n\n输入：第一行输入行m和列n(m<=1000,n<=100)\n第二行输入m行数据，每行n个正整数\n\n输出：输出m行数据，每行n个正整数\n\n\n\n样例输入\n2 4\n56 90 70 69\n93 85 79 74\n样例输出\n56 90 70 69\n93 85 79 74","answer":"hello"}]}
